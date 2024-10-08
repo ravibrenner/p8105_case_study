@@ -1,6 +1,6 @@
 ---
 title: "Case study"
-output: github_document
+output: html_document
 date: "2024-10-08"
 ---
 
@@ -26,6 +26,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ```{r}
 library(p8105.datasets)
+library(leaflet)
 
 data(nyc_airbnb)
 ```
@@ -98,5 +99,64 @@ nyc_airbnb |>
   summarize(mean_price = mean(price)) |>
   pivot_wider(names_from = room_type, 
               values_from = mean_price)
+```
+
+```{r}
+nyc_airbnb |>
+  ggplot(aes(x = review_scores_location, y = price)) +
+  geom_point()
+```
+
+```{r}
+nyc_airbnb |>
+  filter(neighbourhood_group == "Manhattan",
+         price < 1000) |>
+  ggplot(aes(x = lat, y= long, color = price)) + 
+  geom_point(alpha = 0.1)
+```
+
+```{r}
+nyc_airbnb |>
+  filter(neighbourhood_group == "Manhattan",
+         price < 1000,
+         room_type == "Entire home/apt") |>
+  group_by(neighbourhood) |>
+  summarize(mean_price = mean(price)) |>
+  arrange(-mean_price)
+```
+
+```{r}
+nyc_airbnb |>
+  filter(neighbourhood_group == "Manhattan",
+         price < 1000,
+         room_type == "Entire home/apt") |>
+  ggplot(aes(x = neighbourhood, y = price)) +
+  geom_violin() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+```
+
+Go back to the map
+```{r}
+nyc_airbnb |>
+  filter(neighbourhood_group == "Manhattan",
+         price < 1000) |>
+  ggplot(aes(x = lat, y= long, color = price)) + 
+  geom_point(alpha = 0.1)
+```
+
+Can make it way way better with leaflet
+```{r}
+pal <- colorNumeric(palette = "viridis",
+                    domain = nyc_airbnb$review_scores_location)
+
+nyc_airbnb |>
+  filter(neighbourhood_group == "Manhattan",
+         price < 1000) |>
+  leaflet() |>
+  addTiles() |>
+  addCircleMarkers(~lat, ~long,
+                   color = ~pal(review_scores_location),
+                   radius = 2) |>
+  addProviderTiles(providers$CartoDB.Positron)
 ```
 
