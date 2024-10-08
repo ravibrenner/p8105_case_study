@@ -43,3 +43,60 @@ data(nyc_airbnb)
   * Popularity = # of units? Avg price? Stays/month?
 * Are there repeat hosts?
   *If so, what does that mean?
+  
+## Popularity by area
+```{r}
+nyc_airbnb |>
+  count(neighbourhood_group)
+
+nyc_airbnb |>
+  group_by(neighbourhood_group) |>
+  summarize(n = n(),
+            avg_price = mean(price),
+            avg_reviews_month = mean(reviews_per_month, na.rm = TRUE),
+            avg_num_reviews = mean(number_of_reviews, na.rm = TRUE)) 
+```
+
+## examples from class people shared
+```{r}
+nyc_airbnb |>
+  ggplot(aes(x = price, fill = neighbourhood_group)) +
+  geom_histogram() +
+  facet_grid(. ~ neighbourhood_group) +
+  scale_x_continuous(limits = c(0, 250))
+```
+
+```{r}
+nyc_airbnb |>
+  group_by(room_type) |>
+  summarize(mean_price = mean(price))
+```
+
+```{r}
+nyc_airbnb |>
+  ggplot(aes(x = number_of_reviews, y=review_scores_location)) + 
+  geom_point()
+```
+
+```{r}
+nyc_airbnb |>
+  filter(calculated_host_listings_count > 5) |>
+  distinct(host_id, host_name, calculated_host_listings_count) |>
+  arrange(desc(calculated_host_listings_count))
+```
+
+```{r}
+ nyc_airbnb |>
+  group_by(neighbourhood_group) |>
+  summarise(total_reviews = sum(number_of_reviews, na.rm = TRUE)) |>
+  arrange(desc(total_reviews))
+```
+
+```{r}
+nyc_airbnb |>
+  group_by(neighbourhood_group, room_type) |>
+  summarize(mean_price = mean(price)) |>
+  pivot_wider(names_from = room_type, 
+              values_from = mean_price)
+```
+
